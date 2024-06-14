@@ -1,29 +1,16 @@
 import http from "node:http";
+import { json } from "./middlewares/json.js";
 
 const users = [];
 
 const server = http.createServer(async (req, res) => {
   const { method, url } = req;
 
-  // Read streams
-  const buffers = [];
-  // Read all content body
-  for await (const chunk of req) {
-    buffers.push(chunk);
-  }
-
-
-  // Transform body in object JSON
-  try {
-    req.body = JSON.parse(Buffer.concat(buffers).toString());
-  } catch {
-    req.body = null;
-  }
+  // Middleware
+  await json(req, res);
 
   if (method === "GET" && url === "/users") {
-    return res
-      .setHeader("Content-type", "applicatoin/json")
-      .end(JSON.stringify(users));
+    return res.end(JSON.stringify(users));
   }
 
   if (method === "POST" && url === "/users") {
